@@ -10,15 +10,44 @@ export default function App(){
     const response=await fetched.json();
     const cleaner= response.results.map((item)=>({
       naam:item.name,
+      url: item.url,
 
-    }))
-    setData(cleaner)};
+    }));
+    return cleaner};
     
  
+async function fetchingImagePokemon(list) {
+  const final = await Promise.all(
+    list.map(async (item) => {
+      const res = await fetch(item.url);
+      const poke = await res.json();
+
+      return {
+        naam: item.naam,
+        img: poke.sprites.front_default,
+      };
+    })
+  );
+
+  return final;
+}
+
+
+
+
+
+
   
   useEffect(() => {
-    fetchingApi();}
-     , []);
+  async function loadPokemon() {
+    const list = await fetchingApi();           // Step 1: get name + url list
+    const withImages = await fetchingImagePokemon(list);  // Step 2: add images
+    setData(withImages);                        // Step 3: final data saved
+  }
+
+  loadPokemon();
+}, []);
+
 
 
 
@@ -59,6 +88,7 @@ export default function App(){
     <Card 
       key={item.naam}
       title={item.naam}
+      img={item.img}
     />
   ))}
 </div>
